@@ -42,6 +42,7 @@ from diffusion.data.datasets.utils import (
 from diffusion.model.builder import build_model, get_tokenizer_and_text_encoder, get_vae, vae_decode
 from diffusion.model.utils import get_weight_dtype, prepare_prompt_ar
 from diffusion.utils.config import SanaConfig, model_init_config
+from diffusion.utils.device import empty_device_cache, get_preferred_device
 from diffusion.utils.logger import get_root_logger
 
 # from diffusion.utils.misc import read_config
@@ -195,7 +196,7 @@ def visualize(items, bs, sample_steps, cfg_scale, pag_scale=1.0):
 
         samples = samples.to(vae_dtype)
         samples = vae_decode(config.vae.vae_type, vae, samples)
-        torch.cuda.empty_cache()
+        empty_device_cache(device)
 
         os.umask(0o000)
         for i in range(bs):
@@ -261,7 +262,7 @@ if __name__ == "__main__":
         print(f"custom_image_size: {args.image_size}")
 
     set_env(args.seed, args.image_size // config.vae.vae_downsample_rate)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_preferred_device()
     logger = get_root_logger()
 
     # only support fixed latent size currently

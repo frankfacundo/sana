@@ -15,6 +15,22 @@ bash ./environment_setup.sh sana
 # or you can install each components step by step following environment_setup.sh
 ```
 
+## macOS Apple Silicon MPS Install
+
+For Apple Silicon Macs, use the MPS setup script. It skips CUDA-only packages such as `xformers`, `triton`, `bitsandbytes`, and `flash-attn`, and installs the project with the standard macOS PyTorch wheels.
+
+```bash
+bash ./environment_setup_mps.sh sana-mps
+conda activate sana-mps
+```
+
+The script persists these conda environment variables when a conda env name is provided:
+
+```bash
+PYTORCH_ENABLE_MPS_FALLBACK=1
+DISABLE_XFORMERS=1
+```
+
 ## Hardware Requirements
 
 | Model | VRAM Required |

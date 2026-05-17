@@ -43,6 +43,7 @@ from diffusion.data.datasets.utils import (
 from diffusion.model.builder import build_model, get_tokenizer_and_text_encoder, get_vae, vae_decode
 from diffusion.model.utils import get_weight_dtype, prepare_prompt_ar, resize_and_crop_tensor
 from diffusion.utils.config import SanaConfig, model_init_config
+from diffusion.utils.device import empty_device_cache, get_preferred_device
 from diffusion.utils.dist_utils import flush
 from tools.download import find_model
 
@@ -128,7 +129,7 @@ def generate_img(
 ):
     flush()
     gc.collect()
-    torch.cuda.empty_cache()
+    empty_device_cache(device)
 
     seed = int(randomize_seed_fn(seed, randomize_seed))
     set_env(seed)
@@ -252,7 +253,7 @@ if __name__ == "__main__":
     args = get_args()
     config = args = pyrallis.parse(config_class=SanaInference, config_path=args.config)
     # config = read_config(args.config)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_preferred_device()
     logger = get_root_logger()
 
     args.image_size = config.model.image_size
@@ -318,8 +319,8 @@ if __name__ == "__main__":
             """
     if model_size == "0.6":
         DESCRIPTION += "\n<p>0.6B model's text rendering ability is limited.</p>"
-    if not torch.cuda.is_available():
-        DESCRIPTION += "\n<p>Running on CPU 🥶 This demo does not work on CPU.</p>"
+    if device.type == "cpu":
+        DESCRIPTION += "\n<p>Running on CPU. This demo does not work on CPU.</p>"
 
     demo = gr.Interface(
         fn=generate_img,

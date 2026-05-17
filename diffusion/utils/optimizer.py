@@ -21,7 +21,6 @@ from typing import Callable, Optional, Tuple
 import numpy as np
 import torch
 import torch.optim
-from bitsandbytes.optim import AdamW8bit
 from came_pytorch import CAME
 from mmcv import Config
 from mmcv.runner import OPTIMIZER_BUILDERS, OPTIMIZERS, DefaultOptimizerConstructor
@@ -32,6 +31,14 @@ from torch.nn import GroupNorm, LayerNorm
 from torch.optim.optimizer import Optimizer
 
 from .logger import get_root_logger
+
+try:
+    from bitsandbytes.optim import AdamW8bit
+except ImportError:
+
+    class AdamW8bit(torch.optim.Optimizer):
+        def __init__(self, *args, **kwargs):
+            raise ImportError("bitsandbytes is required to use AdamW8bitWrapper.")
 
 
 def auto_scale_lr(effective_bs, optimizer_cfg, rule="linear", base_batch_size=256):

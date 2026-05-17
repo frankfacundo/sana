@@ -29,6 +29,7 @@ from torchvision.transforms import ToTensor
 from torchvision.utils import make_grid
 from tqdm import tqdm, trange
 
+from diffusion.utils.device import get_preferred_device
 from diffusion.utils.logger import get_root_logger
 
 _CITATION = """\
@@ -167,7 +168,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     set_env(args.seed)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_preferred_device()
     logger = get_root_logger()
     generator = torch.Generator(device=device).manual_seed(args.seed)
     n_rows = batch_size = args.n_samples
@@ -178,8 +179,8 @@ if __name__ == "__main__":
     model = DiffusionPipeline.from_pretrained(
         args.model_path, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
     )
-    model.enable_xformers_memory_efficient_attention()
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    if device.type == "cuda":
+        model.enable_xformers_memory_efficient_attention()
     model = model.to(device)
     model.enable_attention_slicing()
 

@@ -41,8 +41,9 @@ class SASolverSampler:
 
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
-            if attr.device != torch.device("cuda"):
-                attr = attr.to(torch.device("cuda"))
+            target_device = torch.device(self.device)
+            if attr.device != target_device:
+                attr = attr.to(target_device)
         setattr(self, name, attr)
 
     @torch.no_grad()
